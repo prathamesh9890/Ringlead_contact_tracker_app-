@@ -1,0 +1,300 @@
+:root {
+  --bg: #e8ecf3;
+  --shadow-light: #ffffff;
+  --shadow-dark: #b8bfcc;
+  --text-primary: #2f3542;
+  --text-secondary: #6b7685;
+  --accent: #6c5ce7;
+  --accent-2: #00b894;
+  --danger: #e6634b;
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  --gap: 24px;
+}
+
+:root[data-theme='dark'] {
+  --bg: #2b2f38;
+  --shadow-light: #363b46;
+  --shadow-dark: #202329;
+  --text-primary: #eef1f6;
+  --text-secondary: #a0a8b8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #2b2f38;
+    --shadow-light: #363b46;
+    --shadow-dark: #202329;
+    --text-primary: #eef1f6;
+    --text-secondary: #a0a8b8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- Neomorphic primitives ---------- */
+
+.neo-raised {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: 9px 9px 18px var(--shadow-dark), -9px -9px 18px var(--shadow-light);
+}
+
+.neo-inset {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+}
+
+.neo-flat {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+}
+
+/* ---------- Buttons ---------- */
+
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px 26px;
+  border-radius: var(--radius-md);
+  box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+  transition: box-shadow 0.15s ease, transform 0.15s ease, color 0.15s ease;
+}
+
+.neo-btn:hover {
+  box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+}
+
+.neo-btn:active,
+.neo-btn.is-active {
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  transform: translateY(1px);
+}
+
+.neo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.neo-btn--accent {
+  color: var(--accent);
+}
+
+.neo-btn--primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 6px 6px 14px rgba(108, 92, 231, 0.35), -6px -6px 14px var(--shadow-light);
+}
+
+.neo-btn--primary:hover {
+  box-shadow: 4px 4px 10px rgba(108, 92, 231, 0.35), -4px -4px 10px var(--shadow-light);
+}
+
+.neo-btn--danger {
+  color: var(--danger);
+}
+
+.neo-btn--sm {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+
+.neo-btn--icon {
+  padding: 12px;
+  border-radius: 50%;
+}
+
+/* ---------- Inputs ---------- */
+
+.neo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.neo-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.neo-input,
+.neo-select {
+  border: none;
+  outline: none;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 15px;
+  padding: 13px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  width: 100%;
+}
+
+.neo-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.neo-input:focus,
+.neo-select:focus {
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 0 2px var(--accent);
+}
+
+/* ---------- Toggle switch ---------- */
+
+.neo-toggle {
+  --w: 52px;
+  --h: 28px;
+  width: var(--w);
+  height: var(--h);
+  border-radius: var(--h);
+  background: var(--bg);
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  position: relative;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.neo-toggle__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(var(--h) - 6px);
+  height: calc(var(--h) - 6px);
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+  transition: left 0.2s ease, background 0.2s ease;
+}
+
+.neo-toggle.is-on .neo-toggle__knob {
+  left: calc(var(--w) - var(--h) + 3px);
+  background: var(--accent-2);
+}
+
+/* ---------- Badge ---------- */
+
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+}
+
+.neo-badge--pro {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), #a29bfe);
+  box-shadow: none;
+}
+
+.neo-badge--free {
+  color: var(--text-secondary);
+}
+
+.neo-badge--active {
+  color: var(--accent-2);
+}
+
+.neo-badge--inactive {
+  color: var(--danger);
+}
+
+/* ---------- Spinner ---------- */
+
+.neo-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--shadow-dark);
+  border-top-color: var(--accent);
+  animation: neo-spin 0.7s linear infinite;
+}
+
+@keyframes neo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Utility ---------- */
+
+.neo-card {
+  padding: 28px;
+}
+
+.neo-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.neo-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.text-muted {
+  color: var(--text-secondary);
+}
+
+.text-danger {
+  color: var(--danger);
+}
