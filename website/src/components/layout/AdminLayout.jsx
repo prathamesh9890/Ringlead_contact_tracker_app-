@@ -4,6 +4,7 @@ import NeoButton from '../ui/NeoButton';
 
 const links = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+  { to: '/admin/leads', label: 'Leads', icon: '🏷️' },
   { to: '/admin/users', label: 'Users', icon: '👥' },
   { to: '/admin/messages', label: 'Messages', icon: '✉️' },
 ];

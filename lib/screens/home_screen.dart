@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.folder_rounded,
                   color: AppColors.blueInk,
                   label: 'Recordings',
-                  onTap: () => TabNavigator.maybeOf(context)?.goToTab(2),
+                  onTap: () => TabNavigator.maybeOf(context)?.goToTab(3),
                 ),
               ),
               const Expanded(

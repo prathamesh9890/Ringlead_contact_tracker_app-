@@ -10,6 +10,7 @@ import Contact from './pages/public/Contact';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
+import Leads from './pages/admin/Leads';
 import UserDetail from './pages/admin/UserDetail';
 import Messages from './pages/admin/Messages';
 import MessageDetail from './pages/admin/MessageDetail';
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="leads" element={<Leads />} />
             <Route path="users" element={<Users />} />
             <Route path="users/:id" element={<UserDetail />} />
             <Route path="messages" element={<Messages />} />

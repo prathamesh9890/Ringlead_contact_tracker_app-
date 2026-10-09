@@ -27,6 +27,8 @@ router.patch(
 
 router.get('/stats', adminController.getStats);
 
+router.get('/leads', adminController.listLeads);
+
 router.get('/contacts', contactController.listMessages);
 
 router.get('/contacts/:id', [param('id').isMongoId()], validate, contactController.getMessage);

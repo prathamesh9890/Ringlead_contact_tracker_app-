@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'screens/app_shell.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_repository.dart';
+import 'services/reminder_service.dart';
 import 'theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Set up local notifications for callback reminders (best-effort).
+  ReminderService.instance.init();
   runApp(const RingleadApp());
 }
 

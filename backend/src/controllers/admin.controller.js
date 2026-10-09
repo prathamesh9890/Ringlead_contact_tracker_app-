@@ -3,6 +3,7 @@ const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const User = require('../models/user.model');
 const ContactMessage = require('../models/contactMessage.model');
+const CallNote = require('../models/callNote.model');
 
 const listUsers = asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -77,4 +78,37 @@ const getStats = asyncHandler(async (req, res) => {
   );
 });
 
-module.exports = { listUsers, getUser, updateUser, getStats };
+// GET /api/admin/leads — every tagged call (note or lead status) across all
+// businesses, newest first, with the business it belongs to.
+const listLeads = asyncHandler(async (req, res) => {
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
+  const { status } = req.query;
+
+  const validStatuses = ['new', 'interested', 'followup', 'won', 'lost'];
+  const filter = validStatuses.includes(status) ? { status } : {};
+
+  const [notes, total] = await Promise.all([
+    CallNote.find(filter)
+      .sort({ updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate('user', 'businessName email'),
+    CallNote.countDocuments(filter),
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(200, {
+      leads: notes.map((n) => ({
+        ...n.toPublicProfile(),
+        business: n.user ? { id: n.user._id.toString(), businessName: n.user.businessName, email: n.user.email } : null,
+      })),
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    }),
+  );
+});
+
+module.exports = { listUsers, getUser, updateUser, getStats, listLeads };

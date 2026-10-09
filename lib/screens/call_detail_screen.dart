@@ -7,6 +7,7 @@ import '../models/api_exception.dart';
 import '../services/contact_actions.dart';
 import '../services/notes_repository.dart';
 import '../services/recording_repository.dart';
+import '../services/reminder_service.dart';
 import '../theme.dart';
 import '../widgets/neu.dart';
 
@@ -22,6 +23,7 @@ class CallDetailScreen extends StatefulWidget {
 class _CallDetailScreenState extends State<CallDetailScreen> {
   final _recordings = RecordingRepository.instance;
   final _notes = NotesRepository.instance;
+  final _reminders = ReminderService.instance;
   bool _savingNote = false;
 
   @override
@@ -29,12 +31,14 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
     super.initState();
     _recordings.addListener(_onRepoChanged);
     _notes.addListener(_onRepoChanged);
+    _reminders.addListener(_onRepoChanged);
   }
 
   @override
   void dispose() {
     _recordings.removeListener(_onRepoChanged);
     _notes.removeListener(_onRepoChanged);
+    _reminders.removeListener(_onRepoChanged);
     super.dispose();
   }
 
@@ -74,6 +78,70 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
     } finally {
       if (mounted) setState(() => _savingNote = false);
     }
+  }
+
+  Future<void> _setReminder() async {
+    final call = widget.call;
+    final now = DateTime.now();
+    final choice = await showModalBottomSheet<DateTime?>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _ReminderSheet(
+        hasExisting: _reminders.reminderFor(call.timestamp) != null,
+        onPick: (value) => Navigator.of(sheetContext).pop(value),
+      ),
+    );
+    if (choice == null || !mounted) return;
+
+    // _ReminderSheet returns epoch 0 to mean "remove".
+    if (choice.millisecondsSinceEpoch == 0) {
+      await _reminders.cancel(call.timestamp);
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reminder removed')));
+      }
+      return;
+    }
+
+    DateTime when = choice;
+    if (when == _customMarker) {
+      final picked = await _pickCustom(now);
+      if (picked == null || !mounted) return;
+      when = picked;
+    }
+    if (when.isBefore(now)) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pick a time in the future.')));
+      return;
+    }
+
+    final granted = await _reminders.requestPermission();
+    if (!granted) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Allow notifications to get reminders.')));
+      return;
+    }
+    await _reminders.schedule(
+      timestamp: call.timestamp,
+      when: when,
+      title: 'Call back ${call.name}',
+      body: call.number.isEmpty ? 'Follow up on this lead' : 'Ring ${call.number} back',
+    );
+    if (mounted) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Reminder set for ${reminderLabel(when)}')));
+    }
+  }
+
+  Future<DateTime?> _pickCustom(DateTime now) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (date == null || !mounted) return null;
+    final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now.add(const Duration(hours: 1))));
+    if (time == null) return null;
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
   Future<void> _dial() async {
@@ -164,6 +232,35 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
                     _LeadStatusChips(
                       selected: _notes.statusFor(call.timestamp),
                       onSelect: _savingNote ? null : _setStatus,
+                    ),
+                    const SizedBox(height: 18),
+                    Builder(
+                      builder: (context) {
+                        final when = _reminders.reminderFor(call.timestamp);
+                        return NeuCard(
+                          onTap: _setReminder,
+                          child: Row(
+                            children: [
+                              Icon(when != null ? Icons.alarm_on_rounded : Icons.alarm_add_rounded, size: 20, color: AppColors.amberInk),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(when != null ? 'Callback reminder' : 'Set callback reminder', style: AppText.cardTitle),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      when != null ? reminderLabel(when) : 'Get a nudge to call this lead back',
+                                      style: AppText.caption,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(when != null ? Icons.edit_rounded : Icons.add_rounded, size: 16, color: AppColors.amberInk),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 18),
                   ],
@@ -508,6 +605,82 @@ class _LeadStatusChips extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+/// Sentinel returned by the reminder sheet to mean "let me pick a date & time".
+final DateTime _customMarker = DateTime.fromMillisecondsSinceEpoch(1);
+
+String reminderLabel(DateTime when) {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  final h = when.hour % 12 == 0 ? 12 : when.hour % 12;
+  final period = when.hour >= 12 ? 'PM' : 'AM';
+  final time = '$h:${when.minute.toString().padLeft(2, '0')} $period';
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(when.year, when.month, when.day);
+  final diff = day.difference(today).inDays;
+  if (diff == 0) return 'Today, $time';
+  if (diff == 1) return 'Tomorrow, $time';
+  return '${when.day} ${months[when.month - 1]}, $time';
+}
+
+/// Quick reminder options. Returns the chosen DateTime, `_customMarker` for a
+/// custom pick, epoch-0 to remove an existing reminder, or null on cancel.
+class _ReminderSheet extends StatelessWidget {
+  const _ReminderSheet({required this.hasExisting, required this.onPick});
+
+  final bool hasExisting;
+  final ValueChanged<DateTime?> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final evening = DateTime(now.year, now.month, now.day, 18);
+    final tomorrow10 = DateTime(now.year, now.month, now.day).add(const Duration(days: 1, hours: 10));
+
+    final options = <(String, IconData, DateTime)>[
+      ('In 1 hour', Icons.timelapse_rounded, now.add(const Duration(hours: 1))),
+      ('In 3 hours', Icons.timelapse_rounded, now.add(const Duration(hours: 3))),
+      if (evening.isAfter(now.add(const Duration(minutes: 30)))) ('This evening, 6 PM', Icons.wb_twilight_rounded, evening),
+      ('Tomorrow, 10 AM', Icons.wb_sunny_rounded, tomorrow10),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+      decoration: const BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(kRadiusCard)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Remind me to call back', style: AppText.screenTitle),
+          const SizedBox(height: 16),
+          ...options.map((o) => _row(o.$1, o.$2, () => onPick(o.$3))),
+          _row('Pick date & time', Icons.event_rounded, () => onPick(_customMarker)),
+          if (hasExisting) _row('Remove reminder', Icons.delete_outline_rounded, () => onPick(DateTime.fromMillisecondsSinceEpoch(0)), danger: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(String label, IconData icon, VoidCallback onTap, {bool danger = false}) {
+    final color = danger ? AppColors.redInk : AppColors.ink;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: NeuCard(
+        onTap: onTap,
+        child: Row(
+          children: [
+            Icon(icon, size: 19, color: danger ? AppColors.redInk : AppColors.amberInk),
+            const SizedBox(width: 14),
+            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: color)),
+          ],
+        ),
+      ),
     );
   }
 }

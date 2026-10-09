@@ -3,6 +3,7 @@ import '../services/notes_repository.dart';
 import '../theme.dart';
 import 'calls_screen.dart';
 import 'home_screen.dart';
+import 'leads_screen.dart';
 import 'profile_screen.dart';
 import 'recordings_screen.dart';
 
@@ -27,6 +28,7 @@ class _AppShellState extends State<AppShell> {
   late final _screens = [
     const HomeScreen(),
     CallsScreen(key: _callsKey),
+    const LeadsScreen(),
     const RecordingsScreen(),
     const ProfileScreen(),
   ];
@@ -34,6 +36,7 @@ class _AppShellState extends State<AppShell> {
   static const _items = [
     (icon: Icons.home_rounded, label: 'Home'),
     (icon: Icons.call_rounded, label: 'Calls'),
+    (icon: Icons.flag_rounded, label: 'Leads'),
     (icon: Icons.folder_rounded, label: 'Recordings'),
     (icon: Icons.settings_rounded, label: 'Profile'),
   ];
