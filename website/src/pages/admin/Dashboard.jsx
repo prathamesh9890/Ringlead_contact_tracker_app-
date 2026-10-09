@@ -37,7 +37,7 @@ export default function Dashboard() {
   return (
     <div className="neo-stack" style={{ gap: 32 }}>
       <div>
-        <h1 style={{ fontSize: 26, fontWeight: 800 }}>Dashboard</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 900 }}>Hello there 👋</h1>
         <p className="text-muted">A quick look at how Ringlead is being adopted.</p>
       </div>
 
@@ -45,16 +45,18 @@ export default function Dashboard() {
       {error && <p className="text-danger">{error}</p>}
 
       {stats && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
+        <div className="tinted" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
           {tiles.map((tile) => (
-            <NeoCard key={tile.key} className="neo-stack" style={{ gap: 12 }}>
+            <NeoCard key={tile.key} className="neo-stack hover-lift" style={{ gap: 12 }}>
               <div className="neo-row" style={{ justifyContent: 'space-between' }}>
-                <span className="text-muted" style={{ fontSize: 14, fontWeight: 600 }}>
+                <span className="text-muted" style={{ fontSize: 14, fontWeight: 700 }}>
                   {tile.label}
                 </span>
-                <span style={{ fontSize: 20 }}>{tile.icon}</span>
+                <span className="icon-bubble" style={{ width: 44, height: 44, fontSize: 20, borderRadius: 14 }}>
+                  {tile.icon}
+                </span>
               </div>
-              <span style={{ fontSize: 34, fontWeight: 800 }}>{stats[tile.key] ?? 0}</span>
+              <span style={{ fontSize: 36, fontWeight: 900 }}>{stats[tile.key] ?? 0}</span>
             </NeoCard>
           ))}
         </div>

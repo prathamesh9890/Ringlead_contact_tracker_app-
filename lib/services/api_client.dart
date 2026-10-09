@@ -22,19 +22,31 @@ class ApiClient {
 
   Future<String>? _refreshing;
 
-  Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? query}) {
-    return _request('GET', path, query: query);
+  Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? query}) async {
+    return _asMap(await _request('GET', path, query: query));
   }
 
-  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body, bool auth = true}) {
-    return _request('POST', path, body: body, auth: auth);
+  /// For endpoints whose `data` is a JSON array (e.g. GET /notes).
+  Future<List<dynamic>> getList(String path, {Map<String, dynamic>? query}) async {
+    final data = await _request('GET', path, query: query);
+    return (data as List<dynamic>?) ?? <dynamic>[];
   }
 
-  Future<Map<String, dynamic>> patch(String path, {Map<String, dynamic>? body}) {
-    return _request('PATCH', path, body: body);
+  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body, bool auth = true}) async {
+    return _asMap(await _request('POST', path, body: body, auth: auth));
   }
 
-  Future<Map<String, dynamic>> _request(
+  Future<Map<String, dynamic>> patch(String path, {Map<String, dynamic>? body}) async {
+    return _asMap(await _request('PATCH', path, body: body));
+  }
+
+  Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? body}) async {
+    return _asMap(await _request('PUT', path, body: body));
+  }
+
+  Map<String, dynamic> _asMap(dynamic data) => (data as Map<String, dynamic>?) ?? <String, dynamic>{};
+
+  Future<dynamic> _request(
     String method,
     String path, {
     Map<String, dynamic>? query,
@@ -74,7 +86,7 @@ class ApiClient {
       );
     }
 
-    return (decoded['data'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+    return decoded['data'];
   }
 
   Future<http.Response> _send(String method, Uri uri, Map<String, String> headers, Map<String, dynamic>? body) {
@@ -86,6 +98,8 @@ class ApiClient {
         return _client.post(uri, headers: headers, body: encodedBody);
       case 'PATCH':
         return _client.patch(uri, headers: headers, body: encodedBody);
+      case 'PUT':
+        return _client.put(uri, headers: headers, body: encodedBody);
       default:
         throw ArgumentError('Unsupported method: $method');
     }

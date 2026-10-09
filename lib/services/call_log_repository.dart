@@ -79,7 +79,7 @@ class CallLogRepository extends ChangeNotifier {
       type: _typeFor(e.callType),
       time: _formatTime(dateTime),
       duration: _formatDuration(e.duration),
-      recorded: false,
+      durationSeconds: e.duration ?? 0,
       day: _dayLabelFor(dateTime),
       timestamp: timestamp,
     );

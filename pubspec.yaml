@@ -37,6 +37,8 @@ dependencies:
   call_log: ^6.0.1
   http: ^1.2.2
   flutter_secure_storage: ^9.2.2
+  just_audio: ^0.10.6
+  permission_handler: 12.0.1
 
 dev_dependencies:
   flutter_test:

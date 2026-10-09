@@ -11,8 +11,9 @@ export default function PublicNavbar() {
   return (
     <header style={{ padding: '20px 0' }}>
       <div className="container neo-row" style={{ justifyContent: 'space-between' }}>
-        <NavLink to="/" style={{ fontSize: 22, fontWeight: 800 }}>
-          Ring<span style={{ color: 'var(--accent)' }}>lead</span>
+        <NavLink to="/" style={{ fontSize: 24, fontWeight: 900 }}>
+          <span className="float" style={{ marginRight: 6 }}>📞</span>
+          Ring<span className="text-gradient">lead</span>
         </NavLink>
 
         <nav className="neo-row" style={{ gap: 28 }}>

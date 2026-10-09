@@ -5,14 +5,14 @@ import NeoButton from '../../components/ui/NeoButton';
 const plans = [
   {
     name: 'Free',
-    price: '$0',
+    price: '₹0',
     tagline: 'For solo businesses getting started',
     features: ['Missed-call logging', '1 team member', 'Basic contact history', 'Email support'],
     variant: undefined,
   },
   {
     name: 'Pro',
-    price: '$29/mo',
+    price: '₹499/mo',
     tagline: 'For growing teams that can’t afford a missed lead',
     features: [
       'Everything in Free',

@@ -43,11 +43,14 @@ export default function Login() {
     >
       <NeoCard style={{ width: '100%', maxWidth: 400 }}>
         <div className="neo-stack" style={{ gap: 24 }}>
-          <div className="neo-stack" style={{ gap: 4, textAlign: 'center' }}>
-            <h1 style={{ fontSize: 24, fontWeight: 800 }}>
-              Ring<span style={{ color: 'var(--accent)' }}>lead</span> Admin
+          <div className="neo-stack" style={{ gap: 4, textAlign: 'center', alignItems: 'center' }}>
+            <div className="icon-bubble float" style={{ background: 'var(--tint-pink)', marginBottom: 12 }}>
+              📞
+            </div>
+            <h1 style={{ fontSize: 26, fontWeight: 900 }}>
+              Ring<span className="text-gradient">lead</span> Admin
             </h1>
-            <p className="text-muted" style={{ fontSize: 14 }}>Sign in with your admin account</p>
+            <p className="text-muted" style={{ fontSize: 14 }}>Welcome back! Sign in with your admin account 👋</p>
           </div>
 
           <form className="neo-stack" style={{ gap: 18 }} onSubmit={handleSubmit}>

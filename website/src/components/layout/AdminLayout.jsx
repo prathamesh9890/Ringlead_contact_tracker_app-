@@ -30,8 +30,9 @@ export default function AdminLayout() {
           gap: 32,
         }}
       >
-        <NavLink to="/" style={{ fontSize: 20, fontWeight: 800 }}>
-          Ring<span style={{ color: 'var(--accent)' }}>lead</span>
+        <NavLink to="/" style={{ fontSize: 22, fontWeight: 900 }}>
+          <span style={{ marginRight: 6 }}>📞</span>
+          Ring<span className="text-gradient">lead</span>
           <div className="text-muted" style={{ fontSize: 12, fontWeight: 500 }}>
             Admin panel
           </div>

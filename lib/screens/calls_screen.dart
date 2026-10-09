@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../services/call_log_repository.dart';
+import '../services/notes_repository.dart';
+import '../services/recording_repository.dart';
 import '../theme.dart';
 import '../widgets/call_log_status_banner.dart';
 import '../widgets/neu.dart';
@@ -25,12 +27,16 @@ class CallsScreenState extends State<CallsScreen> {
   void initState() {
     super.initState();
     _repo.addListener(_onRepoChanged);
+    RecordingRepository.instance.addListener(_onRepoChanged);
+    NotesRepository.instance.addListener(_onRepoChanged);
     if (_repo.status == CallLogStatus.idle) _repo.refresh();
   }
 
   @override
   void dispose() {
     _repo.removeListener(_onRepoChanged);
+    RecordingRepository.instance.removeListener(_onRepoChanged);
+    NotesRepository.instance.removeListener(_onRepoChanged);
     super.dispose();
   }
 
@@ -118,6 +124,8 @@ class _CallRow extends StatelessWidget {
 
   final CallEntry call;
 
+  String _typeWord(String type) => '${type[0].toUpperCase()}${type.substring(1)}';
+
   @override
   Widget build(BuildContext context) {
     return NeuCard(
@@ -136,16 +144,29 @@ class _CallRow extends StatelessWidget {
                   children: [
                     Icon(callTypeIcon(call.type), size: 12, color: callTypeColor(call.type)),
                     const SizedBox(width: 5),
-                    Text(call.number, style: AppText.mono(12, color: AppColors.inkSoft)),
+                    Text(
+                      // The name already shows the number when there's no contact; avoid repeating it.
+                      call.number == call.name ? _typeWord(call.type) : call.number,
+                      style: AppText.mono(12, color: AppColors.inkSoft),
+                    ),
                   ],
                 ),
-                if (call.recorded) ...[
+                if (RecordingRepository.instance.recordingFor(call) != null || NotesRepository.instance.hasNote(call.timestamp)) ...[
                   const SizedBox(height: 3),
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.mic_rounded, size: 10, color: AppColors.blueInk),
-                      SizedBox(width: 3),
-                      Text('Recorded', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.blueInk)),
+                      if (RecordingRepository.instance.recordingFor(call) != null) ...[
+                        const Icon(Icons.mic_rounded, size: 10, color: AppColors.blueInk),
+                        const SizedBox(width: 3),
+                        const Text('Recorded', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.blueInk)),
+                      ],
+                      if (RecordingRepository.instance.recordingFor(call) != null && NotesRepository.instance.hasNote(call.timestamp))
+                        const SizedBox(width: 10),
+                      if (NotesRepository.instance.hasNote(call.timestamp)) ...[
+                        const Icon(Icons.sticky_note_2_rounded, size: 10, color: AppColors.violetInk),
+                        const SizedBox(width: 3),
+                        const Text('Note', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.violetInk)),
+                      ],
                     ],
                   ),
                 ],

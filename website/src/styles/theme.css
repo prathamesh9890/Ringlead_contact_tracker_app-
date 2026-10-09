@@ -1,34 +1,35 @@
+/* Light, soft and friendly theme (light is the only theme). */
 :root {
-  --bg: #e8ecf3;
+  color-scheme: light;
+
+  --bg: #fdf9ff;
+  --surface: #ffffff;
+  --surface-soft: #f6f1ff;
+  --border: #eee6ff;
+  /* --shadow-dark is also used by pages for table row / divider lines */
+  --shadow-dark: #efe8fb;
   --shadow-light: #ffffff;
-  --shadow-dark: #b8bfcc;
-  --text-primary: #2f3542;
-  --text-secondary: #6b7685;
-  --accent: #6c5ce7;
-  --accent-2: #00b894;
-  --danger: #e6634b;
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --radius-sm: 10px;
+  --shadow-soft: 0 10px 30px rgba(124, 92, 231, 0.1), 0 2px 6px rgba(124, 92, 231, 0.06);
+  --shadow-hover: 0 16px 40px rgba(124, 92, 231, 0.16), 0 4px 10px rgba(124, 92, 231, 0.08);
+
+  --text-primary: #3b2f5c;
+  --text-secondary: #8077a0;
+  --accent: #8b5cf6;
+  --accent-pink: #f472b6;
+  --accent-2: #10b981;
+  --danger: #f43f5e;
+  --gradient: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+
+  --tint-pink: #ffe4f0;
+  --tint-purple: #ede4ff;
+  --tint-blue: #dff1ff;
+  --tint-mint: #dcfce7;
+  --tint-peach: #ffedd5;
+
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
   --gap: 24px;
-}
-
-:root[data-theme='dark'] {
-  --bg: #2b2f38;
-  --shadow-light: #363b46;
-  --shadow-dark: #202329;
-  --text-primary: #eef1f6;
-  --text-secondary: #a0a8b8;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --bg: #2b2f38;
-    --shadow-light: #363b46;
-    --shadow-dark: #202329;
-    --text-primary: #eef1f6;
-    --text-secondary: #a0a8b8;
-  }
 }
 
 * {
@@ -43,10 +44,15 @@ body,
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-  background: var(--bg);
+  font-family: 'Nunito', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
   color: var(--text-primary);
-  transition: background-color 0.25s ease, color 0.25s ease;
+  background:
+    radial-gradient(circle at 8% 8%, #ffe4f0 0, transparent 32%),
+    radial-gradient(circle at 92% 12%, #dff1ff 0, transparent 30%),
+    radial-gradient(circle at 70% 95%, #ede4ff 0, transparent 38%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -62,8 +68,18 @@ p {
   margin: 0;
 }
 
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+}
+
 button {
   font-family: inherit;
+}
+
+::selection {
+  background: var(--tint-pink);
 }
 
 .container {
@@ -73,23 +89,33 @@ button {
   padding: 0 24px;
 }
 
-/* ---------- Neomorphic primitives ---------- */
+/* ---------- Surfaces ---------- */
 
 .neo-raised {
-  background: var(--bg);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: 9px 9px 18px var(--shadow-dark), -9px -9px 18px var(--shadow-light);
+  box-shadow: var(--shadow-soft);
 }
 
 .neo-inset {
-  background: var(--bg);
+  background: var(--surface-soft);
   border-radius: var(--radius-md);
-  box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
 }
 
 .neo-flat {
-  background: var(--bg);
-  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid var(--border);
+}
+
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
 }
 
 /* ---------- Buttons ---------- */
@@ -99,55 +125,65 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: none;
+  border: 1px solid var(--border);
   cursor: pointer;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text-primary);
   font-size: 15px;
-  font-weight: 600;
-  padding: 13px 26px;
-  border-radius: var(--radius-md);
-  box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
-  transition: box-shadow 0.15s ease, transform 0.15s ease, color 0.15s ease;
+  font-weight: 700;
+  padding: 12px 26px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(124, 92, 231, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .neo-btn:hover {
-  box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(124, 92, 231, 0.16);
 }
 
 .neo-btn:active,
 .neo-btn.is-active {
-  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-  transform: translateY(1px);
+  transform: translateY(0) scale(0.98);
+  background: var(--surface-soft);
 }
 
 .neo-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
 }
 
 .neo-btn--accent {
   color: var(--accent);
+  background: var(--tint-purple);
+  border-color: transparent;
 }
 
 .neo-btn--primary {
-  background: var(--accent);
+  background: var(--gradient);
   color: #fff;
-  box-shadow: 6px 6px 14px rgba(108, 92, 231, 0.35), -6px -6px 14px var(--shadow-light);
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(236, 72, 153, 0.28);
 }
 
 .neo-btn--primary:hover {
-  box-shadow: 4px 4px 10px rgba(108, 92, 231, 0.35), -4px -4px 10px var(--shadow-light);
+  box-shadow: 0 12px 26px rgba(236, 72, 153, 0.36);
+}
+
+.neo-btn--primary:active {
+  background: var(--gradient);
 }
 
 .neo-btn--danger {
   color: var(--danger);
+  background: #ffe4e9;
+  border-color: transparent;
 }
 
 .neo-btn--sm {
-  padding: 8px 16px;
+  padding: 8px 18px;
   font-size: 13px;
-  border-radius: var(--radius-sm);
 }
 
 .neo-btn--icon {
@@ -165,30 +201,33 @@ button {
 
 .neo-field label {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
 .neo-input,
 .neo-select {
-  border: none;
+  border: 2px solid var(--border);
   outline: none;
-  background: var(--bg);
+  background: var(--surface-soft);
   color: var(--text-primary);
+  font-family: inherit;
   font-size: 15px;
-  padding: 13px 16px;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
-  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
   width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .neo-input::placeholder {
-  color: var(--text-secondary);
+  color: #b3abcc;
 }
 
 .neo-input:focus,
 .neo-select:focus {
-  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 0 2px var(--accent);
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
 }
 
 /* ---------- Toggle switch ---------- */
@@ -199,13 +238,17 @@ button {
   width: var(--w);
   height: var(--h);
   border-radius: var(--h);
-  background: var(--bg);
-  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  background: #e6e0f3;
   position: relative;
   cursor: pointer;
   border: none;
   padding: 0;
   flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.neo-toggle.is-on {
+  background: var(--accent-2);
 }
 
 .neo-toggle__knob {
@@ -215,14 +258,13 @@ button {
   width: calc(var(--h) - 6px);
   height: calc(var(--h) - 6px);
   border-radius: 50%;
-  background: var(--bg);
-  box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
-  transition: left 0.2s ease, background 0.2s ease;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(59, 47, 92, 0.2);
+  transition: left 0.2s ease;
 }
 
 .neo-toggle.is-on .neo-toggle__knob {
   left: calc(var(--w) - var(--h) + 3px);
-  background: var(--accent-2);
 }
 
 /* ---------- Badge ---------- */
@@ -230,30 +272,34 @@ button {
 .neo-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 14px;
+  gap: 6px;
+  padding: 6px 14px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.02em;
-  box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+  background: var(--tint-purple);
+  color: var(--accent);
 }
 
 .neo-badge--pro {
   color: #fff;
-  background: linear-gradient(135deg, var(--accent), #a29bfe);
-  box-shadow: none;
+  background: var(--gradient);
 }
 
 .neo-badge--free {
   color: var(--text-secondary);
+  background: var(--surface-soft);
 }
 
 .neo-badge--active {
-  color: var(--accent-2);
+  color: #059669;
+  background: var(--tint-mint);
 }
 
 .neo-badge--inactive {
   color: var(--danger);
+  background: #ffe4e9;
 }
 
 /* ---------- Spinner ---------- */
@@ -262,14 +308,70 @@ button {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 3px solid var(--shadow-dark);
-  border-top-color: var(--accent);
+  border: 3px solid var(--tint-purple);
+  border-top-color: var(--accent-pink);
   animation: neo-spin 0.7s linear infinite;
 }
 
 @keyframes neo-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ---------- Cute extras ---------- */
+
+.text-gradient {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.icon-bubble {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  border-radius: 20px;
+  background: var(--tint-purple);
+}
+
+.tinted > :nth-child(5n + 1) .icon-bubble {
+  background: var(--tint-pink);
+}
+.tinted > :nth-child(5n + 2) .icon-bubble {
+  background: var(--tint-blue);
+}
+.tinted > :nth-child(5n + 3) .icon-bubble {
+  background: var(--tint-mint);
+}
+.tinted > :nth-child(5n + 4) .icon-bubble {
+  background: var(--tint-peach);
+}
+.tinted > :nth-child(5n + 5) .icon-bubble {
+  background: var(--tint-purple);
+}
+
+.float {
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-8px) rotate(-6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float {
+    animation: none;
+  }
+  .hover-lift:hover,
+  .neo-btn:hover {
+    transform: none;
   }
 }
 
@@ -297,4 +399,10 @@ button {
 
 .text-danger {
   color: var(--danger);
+}
+
+table th {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 800;
 }

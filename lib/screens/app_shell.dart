@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/notes_repository.dart';
 import '../theme.dart';
 import 'calls_screen.dart';
 import 'home_screen.dart';
@@ -15,6 +16,13 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
   final _callsKey = GlobalKey<CallsScreenState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Load the signed-in business's saved call notes once the app is open.
+    NotesRepository.instance.load();
+  }
 
   late final _screens = [
     const HomeScreen(),

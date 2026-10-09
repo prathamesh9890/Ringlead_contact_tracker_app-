@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/api_exception.dart';
 import '../models/app_user.dart';
 import 'api_client.dart';
+import 'notes_repository.dart';
 import 'token_storage.dart';
 
 enum AuthStatus { initializing, signedOut, signedIn }
@@ -73,6 +74,7 @@ class AuthRepository extends ChangeNotifier {
       // Best-effort — clear local state regardless of server response.
     }
     await _tokens.clear();
+    NotesRepository.instance.clearCache();
     _currentUser = null;
     _status = AuthStatus.signedOut;
     notifyListeners();
@@ -119,6 +121,7 @@ class AuthRepository extends ChangeNotifier {
 
   void _handleSessionExpired() {
     _tokens.clear();
+    NotesRepository.instance.clearCache();
     _currentUser = null;
     _status = AuthStatus.signedOut;
     notifyListeners();

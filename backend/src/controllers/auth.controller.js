@@ -23,7 +23,7 @@ const register = asyncHandler(async (req, res) => {
 
   const existing = await User.findOne({ email: email.toLowerCase() });
   if (existing) {
-    throw new ApiError(409, 'An account with this email already exists');
+    throw new ApiError(409, 'An account with this email already existed');
   }
 
   const passwordHash = await hashPassword(password);
