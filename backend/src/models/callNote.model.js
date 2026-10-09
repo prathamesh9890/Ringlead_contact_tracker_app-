@@ -31,6 +31,11 @@ const callNoteSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    status: {
+      type: String,
+      enum: ['none', 'new', 'interested', 'followup', 'won', 'lost'],
+      default: 'none',
+    },
   },
   { timestamps: true },
 );
@@ -44,6 +49,7 @@ callNoteSchema.methods.toPublicProfile = function toPublicProfile() {
     number: this.number,
     name: this.name,
     note: this.note,
+    status: this.status,
     updatedAt: this.updatedAt,
   };
 };

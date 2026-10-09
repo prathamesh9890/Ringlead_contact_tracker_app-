@@ -8,13 +8,14 @@ const listNotes = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, notes.map((n) => n.toPublicProfile())));
 });
 
-// PUT /api/notes/:callKey — create or update the note for one call.
-// An empty note deletes it, so clearing the field removes the record.
+// PUT /api/notes/:callKey — create or update the note and/or lead status for a
+// call. When both the note and status are empty, the record is removed.
 const upsertNote = asyncHandler(async (req, res) => {
   const { callKey } = req.params;
-  const { note = '', number = '', name = '' } = req.body;
+  const { note = '', number = '', name = '', status = 'none' } = req.body;
+  const trimmedNote = note.trim();
 
-  if (!note.trim()) {
+  if (!trimmedNote && (!status || status === 'none')) {
     await CallNote.deleteOne({ user: req.user._id, callKey });
     res.status(200).json(new ApiResponse(200, null, 'Note cleared'));
     return;
@@ -22,10 +23,10 @@ const upsertNote = asyncHandler(async (req, res) => {
 
   const saved = await CallNote.findOneAndUpdate(
     { user: req.user._id, callKey },
-    { $set: { note: note.trim(), number, name } },
+    { $set: { note: trimmedNote, number, name, status } },
     { new: true, upsert: true, setDefaultsOnInsert: true },
   );
-  res.status(200).json(new ApiResponse(200, saved.toPublicProfile(), 'Note saved'));
+  res.status(200).json(new ApiResponse(200, saved.toPublicProfile(), 'Saved'));
 });
 
 // DELETE /api/notes/:callKey

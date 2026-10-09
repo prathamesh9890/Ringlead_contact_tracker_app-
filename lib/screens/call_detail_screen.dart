@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../data/mock_data.dart';
 import '../models/api_exception.dart';
+import '../services/contact_actions.dart';
 import '../services/notes_repository.dart';
 import '../services/recording_repository.dart';
 import '../theme.dart';
@@ -51,16 +52,41 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
       builder: (_) => _NoteSheet(controller: controller),
     );
     if (saved != true || !mounted) return;
+    await _save(note: controller.text, status: _notes.statusFor(call.timestamp));
+  }
 
+  Future<void> _setStatus(LeadStatus status) async {
+    final call = widget.call;
+    // Tapping the current status again clears it.
+    final next = _notes.statusFor(call.timestamp) == status ? LeadStatus.none : status;
+    await _save(note: _notes.noteFor(call.timestamp) ?? '', status: next);
+  }
+
+  Future<void> _save({required String note, required LeadStatus status}) async {
+    final call = widget.call;
     setState(() => _savingNote = true);
     try {
-      await _notes.save(call.timestamp, controller.text, number: call.number, name: call.name);
+      await _notes.save(call.timestamp, note: note, status: status, number: call.number, name: call.name);
     } on ApiException catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not save note — check your connection.')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not save — check your connection.')));
     } finally {
       if (mounted) setState(() => _savingNote = false);
+    }
+  }
+
+  Future<void> _dial() async {
+    final ok = await ContactActions.dial(widget.call.number);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No phone app found to dial this number.')));
+    }
+  }
+
+  Future<void> _whatsApp() async {
+    final ok = await ContactActions.whatsApp(widget.call.number, message: 'Hi! Sorry we missed your call. How can we help you?');
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('WhatsApp is not installed, or the number is invalid.')));
     }
   }
 
@@ -132,6 +158,15 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 18),
+                  if (call.timestamp != 0) ...[
+                    const Text('LEAD STATUS', style: AppText.sectionLabel),
+                    const SizedBox(height: 10),
+                    _LeadStatusChips(
+                      selected: _notes.statusFor(call.timestamp),
+                      onSelect: _savingNote ? null : _setStatus,
+                    ),
+                    const SizedBox(height: 18),
+                  ],
                   if (recording != null) ...[
                     const Text('RECORDING', style: AppText.sectionLabel),
                     const SizedBox(height: 10),
@@ -170,16 +205,38 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
                     },
                   ),
                   const SizedBox(height: 18),
-                  NeuCard(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.call_rounded, size: 20, color: AppColors.blueInk),
-                        SizedBox(width: 10),
-                        Text('Call Back', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  if (call.number.isNotEmpty)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: NeuCard(
+                            onTap: _dial,
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.call_rounded, size: 20, color: AppColors.greenInk),
+                                SizedBox(width: 10),
+                                Text('Call Back', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: NeuCard(
+                            onTap: _whatsApp,
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.chat_rounded, size: 20, color: AppColors.greenInk),
+                                SizedBox(width: 10),
+                                Text('WhatsApp', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
                 ],
               ),
             ),
@@ -395,6 +452,62 @@ class _NoteSheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Brand colour for each lead status, used for chips and list badges.
+Color leadStatusColor(LeadStatus s) => switch (s) {
+      LeadStatus.none => AppColors.inkFaint,
+      LeadStatus.newLead => AppColors.blueInk,
+      LeadStatus.interested => AppColors.violetInk,
+      LeadStatus.followup => AppColors.amberInk,
+      LeadStatus.won => AppColors.greenInk,
+      LeadStatus.lost => AppColors.redInk,
+    };
+
+/// Row of tappable chips for picking a call's lead status. Tapping the selected
+/// one again clears it (handled by the parent).
+class _LeadStatusChips extends StatelessWidget {
+  const _LeadStatusChips({required this.selected, required this.onSelect});
+
+  final LeadStatus selected;
+  final ValueChanged<LeadStatus>? onSelect;
+
+  static const _options = [
+    LeadStatus.newLead,
+    LeadStatus.interested,
+    LeadStatus.followup,
+    LeadStatus.won,
+    LeadStatus.lost,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: _options.map((s) {
+        final active = s == selected;
+        final color = leadStatusColor(s);
+        return GestureDetector(
+          onTap: onSelect == null ? null : () => onSelect!(s),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            decoration: active
+                ? BoxDecoration(color: color, borderRadius: BorderRadius.circular(kRadiusPill))
+                : neuRaisedSm(radius: kRadiusPill),
+            child: Text(
+              leadStatusLabel(s),
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: active ? Colors.white : color,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

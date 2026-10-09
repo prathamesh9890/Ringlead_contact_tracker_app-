@@ -179,6 +179,13 @@ class _CallRow extends StatelessWidget {
               Text(call.time, style: AppText.mono(12, weight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(call.duration, style: AppText.mono(11, color: AppColors.inkFaint)),
+              if (NotesRepository.instance.hasStatus(call.timestamp)) ...[
+                const SizedBox(height: 6),
+                StatusPill(
+                  label: leadStatusLabel(NotesRepository.instance.statusFor(call.timestamp)),
+                  color: leadStatusColor(NotesRepository.instance.statusFor(call.timestamp)),
+                ),
+              ],
             ],
           ),
         ],

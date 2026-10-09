@@ -17,6 +17,10 @@ router.put(
     body('note').optional({ nullable: true }).isString().isLength({ max: 2000 }).withMessage('Note is too long'),
     body('number').optional({ nullable: true }).isString().trim(),
     body('name').optional({ nullable: true }).isString().trim(),
+    body('status')
+      .optional({ nullable: true })
+      .isIn(['none', 'new', 'interested', 'followup', 'won', 'lost'])
+      .withMessage('Invalid status'),
   ],
   validate,
   noteController.upsertNote,
